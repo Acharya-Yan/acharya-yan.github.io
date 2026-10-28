@@ -1,4 +1,4 @@
-name: Check and deploy website
+name: Check website
 
 on:
   push:
@@ -36,13 +36,14 @@ jobs:
       - name: Build website
         run: npm run build
       - name: Upload website
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && vars.PUBLISH_WEBSITE == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: chenyu-studio/dist
 
   deploy:
-    if: github.event_name != 'pull_request'
+    # Disabled until the owner explicitly approves publication and enables Pages.
+    if: github.event_name != 'pull_request' && vars.PUBLISH_WEBSITE == 'true'
     needs: build
     runs-on: ubuntu-latest
     permissions:

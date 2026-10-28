@@ -1,8 +1,8 @@
 # 严晨宇 · 线上工作室
 
-白底黑色漫画工作室，Astro + React + TypeScript + Motion。当前保留电脑端实现，使用 GitHub 做版本管理，并通过 GitHub Pages 部署。
+白底黑色漫画工作室，Astro + React + TypeScript + Motion。当前保留电脑端实现，使用私有 GitHub 仓库做版本管理，网站暂不公开发布。
 
-网站：<https://acharya-yan.github.io/>。仓库、更新步骤与自动部署说明见[根目录 README](../README.md)。
+仓库、更新步骤与发布准备说明见[根目录 README](../README.md)。
 
 另有独立的 Three.js **360° 空间实验版**：`/space/`，原版 `/` 保留。支持完整环绕、相机和桌面视角、人物与屏幕点击、镜头靠近和详情侧栏。使用方式与实现边界见 [SPACE.md](SPACE.md)。
 
@@ -52,7 +52,7 @@ npm run dev
 
 2026-10-23：`npm run check` 通过（16 个文件，0 错误、0 警告、0 提示）；`npm run build` 成功生成 6 个页面及站点地图，产物位于 `dist/`。构建期间的 notes 集合为空提示对应尚未提供文章的正常空状态，不影响构建。依赖安装审计报告为 0 个已知漏洞。以上为编译结果，不代表浏览器视觉或交互验收。
 
-2026-10-28：迁移至 GitHub Pages，站点元数据和站点地图使用 `https://acharya-yan.github.io/`。`.openai/hosting.json` 仅在本地保留原 Sites 配置，不提交到 GitHub；当前发布使用根目录 `.github/workflows/deploy.yml`。
+2026-10-28：配置私有 GitHub 版本管理和自动检查。用户选择暂不公开；Pages 部署默认关闭。站点元数据和站点地图预设 `https://acharya-yan.github.io/` 作为未来发布地址，并不代表已经上线。`.openai/hosting.json` 仅在本地保留原 Sites 配置，不提交到 GitHub；检查与部署准备位于根目录 `.github/workflows/deploy.yml`。
 
 作品、履历、文章和联系方式仍需真实内容。当前仅“我的线上工作室”这一正在制作的项目有内容，其状态明确标记为进行中。`site.showDrafts` 当前为 true；对外发布时可改成 false，并将需要展示的 Markdown 设置为 `draft: false`。
 
