@@ -1,0 +1,23 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import { site } from '../../data/site';
+export async function getStaticPaths() {
+  const works = (await getCollection('work', ({data}) => site.showDrafts || !data.draft)).sort((a,b) => b.data.date.valueOf()-a.data.date.valueOf());
+  return works.map((work,index) => ({ params:{slug:work.id}, props:{work, next:works.length > 1 ? works[(index+1)%works.length] : null} }));
+}
+interface Props { work: CollectionEntry<'work'>; next: CollectionEntry<'work'> | null; }
+const { work, next } = Astro.props;
+const { Content } = await render(work);
+---
+<Base title={work.data.title} description={work.data.summary} noindex={work.data.draft}>
+  <article class="case-page shell">
+    <a class="back-link" href="/work/"><Icon size={16}/>返回作品</a>
+    <header class="case-heading"><h1>{work.data.title}</h1><p>{work.data.summary}</p></header>
+    <dl class="case-meta"><div><dt>项目类型</dt><dd>{work.data.category}</dd></div>{work.data.role && <div><dt>角色</dt><dd>{work.data.role}</dd></div>}<div><dt>年份</dt><dd>{work.data.date.getUTCFullYear()}</dd></div><div><dt>状态</dt><dd>{work.data.draft ? '进行中 · 内容持续补充' : '已发布'}</dd></div></dl>
+    {work.data.cover && <figure class="case-cover"><img src={work.data.cover} alt={work.data.coverAlt ?? work.data.title} width="1448" height="1086" fetchpriority="high" /></figure>}
+    <div class="prose case-prose"><Content/>{work.data.url && <p><a href={work.data.url} target="_blank" rel="noopener noreferrer">访问项目网站</a></p>}</div>
+    <nav class="next-project" aria-label="继续浏览">{next ? <a href={`/work/${next.id}/`}><span>下一个作品</span><strong>{next.data.title}</strong><Icon size={30}/></a> : <a href="/work/"><span>继续浏览</span><strong>回到作品目录</strong><Icon size={30}/></a>}</nav>
+  </article>
+</Base>

@@ -1,0 +1,18 @@
+---
+import Base from '../layouts/Base.astro';
+import Contact from '../components/Contact.astro';
+import Icon from '../components/Icon.astro';
+import { equipment } from '../data/site';
+---
+<Base title="关于" description="你好，我是严晨宇。先从我的工作室认识我。">
+  <section class="about-intro shell">
+    <div><h1>屏幕的另一边，<br/>是我。<span class="serif">A little about me.</span></h1><p class="about-lead">你好，我是严晨宇。</p><p>这个小小的线上空间，从我的桌搭开始。<br/>一张熟悉的桌子，一台相机，<br/>还有坐在镜头前的我。</p><p class="muted">更多关于我的故事，之后慢慢告诉你。</p><a href="#my-desk" class="text-link">先看看我的桌搭 <Icon name="down" size={17}/></a></div>
+    <div class="about-avatar"><img src="/assets/avatar.webp" alt="严晨宇的漫画形象，戴透明框眼镜，穿白色卫衣，坐在办公椅上" width="1448" height="1086" fetchpriority="high"/><span class="avatar-signature serif">Hello, I'm Chenyu.</span></div>
+  </section>
+  <section id="my-desk" class="desk-story shell">
+    <div class="section-heading"><h2>我的桌面，我的日常。</h2><span class="serif section-aside">Behind the screen</span></div>
+    <div class="desk-story-layout"><img src="/assets/desk.webp" alt="左侧笔记本、中央主显示器与挂灯、白色键盘、平板、手机、音箱和右侧游戏主机组成的桌搭" width="1448" height="1086" loading="lazy"/><div class="equipment-list">{equipment.map((item,index) => <details open={index === 0}><summary>{item.name}<Icon name="plus" size={18}/></summary><p>{item.description}</p></details>)}</div></div>
+  </section>
+  <section class="about-later shell"><span class="serif">Still becoming.</span><div><h2>介绍还在慢慢补全。</h2><p>经历、兴趣、最近在做的事情，<br/>都会陆续放进来。</p><a class="text-link" href="/work/">先看看正在做的事 <Icon size={17}/></a></div></section>
+  <Contact/>
+</Base>

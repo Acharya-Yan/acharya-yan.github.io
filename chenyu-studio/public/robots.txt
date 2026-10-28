@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://acharya-yan.github.io/sitemap-index.xml

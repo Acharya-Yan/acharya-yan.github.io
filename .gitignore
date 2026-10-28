@@ -1,0 +1,13 @@
+.DS_Store
+node_modules/
+dist/
+.astro/
+.sites-runtime/
+.env
+.env.*
+!.env.example
+*.log
+
+# Local reference photos and previous hosting identity stay on this computer.
+references/
+.openai/

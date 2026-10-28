@@ -1,0 +1,14 @@
+---
+import { site } from '../data/site';
+import Icon from './Icon.astro';
+---
+<section id="contact" class="contact-section shell" aria-labelledby="contact-heading">
+  <div>
+    <h2 id="contact-heading">想聊聊吗？<span class="serif">Say hello.</span></h2>
+    <p>关于作品、生活，或者只是打个招呼。</p>
+  </div>
+  <div class="contact-details">
+    {site.email ? <><a class="email-link" href={`mailto:${site.email}`}>{site.email}<Icon /></a><button type="button" class="quiet-button" data-copy-email={site.email}><Icon name="copy" size={16} />复制邮箱</button><p class="copy-status" data-copy-status role="status" aria-live="polite"></p></> : <div class="contact-pending"><span class="small-circle" aria-hidden="true"></span><span>联系方式，稍后放在这里。<small>这个空间正在慢慢完善。</small></span></div>}
+    {site.socials.length > 0 && <div class="social-links">{site.socials.map(social => <a href={social.url} target="_blank" rel="noopener noreferrer">{social.label}<Icon size={14}/></a>)}</div>}
+  </div>
+</section>

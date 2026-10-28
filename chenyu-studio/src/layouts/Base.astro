@@ -1,0 +1,64 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import { site } from '../data/site';
+import Icon from '../components/Icon.astro';
+import '../styles/global.css';
+interface Props { title?: string; description?: string; noindex?: boolean; }
+const { title, description = site.description, noindex = false } = Astro.props;
+const pageTitle = title ? `${title} — ${site.name}` : site.title;
+const path = Astro.url.pathname;
+const canonical = new URL(path, Astro.site);
+---
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#ffffff" />
+    {noindex && <meta name="robots" content="noindex,follow" />}
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL('/assets/studio-poster.webp', Astro.site)} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <title>{pageTitle}</title>
+    <ClientRouter />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到主要内容</a>
+    <header class="site-header shell">
+      <a href="/" class="identity" aria-label="严晨宇，返回工作室">
+        <svg class="identity-mark" viewBox="0 0 36 36" width="36" height="36" fill="none" aria-hidden="true"><path d="M7 11v7c0 6 8 6 8 0v-7M15 17l6 9M29 11h-5c-8 0-8 14 0 14h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M6 30h24" stroke="currentColor" stroke-width="1"/></svg>
+        <span>{site.name}<small>CHENYU YAN</small></span>
+      </a>
+      <nav class="primary-nav" aria-label="主要导航">
+        {site.navigation.map(item => <a href={item.href} class:list={{ active: item.href === '/' ? path === '/' : path.startsWith(item.href) }} aria-current={(item.href === '/' ? path === '/' : path.startsWith(item.href)) ? 'page' : undefined}>{item.label}</a>)}
+      </nav>
+      <a href="/#contact" class="header-contact">打个招呼<Icon size={17}/></a>
+    </header>
+    <main id="main" tabindex="-1"><slot /></main>
+    <footer class="site-footer shell">
+      <span>© {new Date().getFullYear()} {site.name}</span>
+      <span class="footer-note">一点点构建，慢慢来。</span>
+      <a href="#main">回到顶部 <Icon name="up" size={14} /></a>
+    </footer>
+    <script>
+      function wireContact() {
+        const button = document.querySelector<HTMLButtonElement>('[data-copy-email]');
+        if (!button) return;
+        button.addEventListener('click', async () => {
+          const email = button.dataset.copyEmail;
+          const status = document.querySelector<HTMLElement>('[data-copy-status]');
+          if (!email || !status) return;
+          try { await navigator.clipboard.writeText(email); status.textContent = '邮箱已复制'; }
+          catch { status.textContent = '复制未完成，请选择邮箱文字手动复制。'; }
+        });
+      }
+      document.addEventListener('astro:page-load', wireContact);
+    </script>
+  </body>
+</html>

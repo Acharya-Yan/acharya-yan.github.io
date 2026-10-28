@@ -1,0 +1,14 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import { site } from '../../data/site';
+const notes = (await getCollection('notes', ({data}) => site.showDrafts || !data.draft)).sort((a,b) => b.data.date.valueOf()-a.data.date.valueOf());
+---
+<Base title="文字" description="给观察、想法和随记，留一个安静的地方。">
+  <div class="page-content shell notes-page">
+    <header class="page-heading"><h1>文字<span class="serif">Notes & thoughts.</span></h1><p>给观察、想法和随记，<br/>留一个安静的地方。</p></header>
+    <div class="collection-bar"><span>全部文字</span><span>{String(notes.length).padStart(2,'0')} 篇</span></div>
+    {notes.length ? <div class="note-list">{notes.map(note => <a class="note-row" href={`/notes/${note.id}/`}><time datetime={note.data.date.toISOString()}>{note.data.date.toLocaleDateString('zh-CN',{timeZone:'Asia/Shanghai'})}</time><div><h2>{note.data.title}</h2><p>{note.data.summary}</p></div><span>{note.data.category}</span><Icon size={18}/></a>)}</div> : <div class="empty-notebook"><span class="serif">Not everything<br/>needs to be rushed.</span><div class="empty-writing-line"/><p>第一篇文字，还在酝酿。<br/>想清楚一点，再写下来。</p><a class="text-link" href="/">先回工作室逛逛 <Icon size={17}/></a></div>}
+  </div>
+</Base>

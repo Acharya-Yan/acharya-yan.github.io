@@ -1,0 +1,12 @@
+{
+  "mode": "experience",
+  "direction": "white manga personal studio",
+  "authority": "concepts/studio-lineart-v2.png",
+  "colors": { "paper": "#ffffff", "ink": "#20201e", "muted": "#696964", "wash": "#f6f6f3", "line": "#e6e6e0" },
+  "fonts": { "body": "Studio Sans", "display": "Newsreader" },
+  "spacing": [8,12,20,32,48,72,104],
+  "radii": { "button": 8, "toolbar": 999 },
+  "motion": { "controlMs": 180, "hintMs": 240, "viewfinderMs": 450, "reducedMotion": true },
+  "scope": "desktop-only",
+  "review": "User explicitly deferred browser preview, acceptance review and mobile work. Compilation only."
+}

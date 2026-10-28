@@ -1,0 +1,1 @@
+Newsreader and Noto Sans SC from Google Fonts official repository. SIL Open Font License 1.1; licenses included. Chinese font subset was produced locally with FontTools; no source text was sent to external services. Regenerate locally when adding content; missing glyphs use system fonts.
