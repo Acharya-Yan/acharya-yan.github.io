@@ -1,6 +1,6 @@
 # 严晨宇 · 个人网站
 
-私有仓库：<https://github.com/Acharya-Yan/Acharya-Yan.github.io>
+私有仓库：<https://github.com/Acharya-Yan/personal-website>
 
 当前仅使用 GitHub 做私有版本管理，网站暂不公开发布。
 
@@ -33,16 +33,16 @@ git commit -m "描述这次修改"
 git push origin main
 ```
 
-推送 `main` 或创建拉取请求后，[GitHub Actions](https://github.com/Acharya-Yan/Acharya-Yan.github.io/actions) 自动安装锁定的依赖、进行类型检查并构建。检查结果和历史可在 Actions 查看，也可以手动运行工作流重新检查。
+推送 `main` 或创建拉取请求后，[GitHub Actions](https://github.com/Acharya-Yan/personal-website/actions) 自动安装锁定的依赖、进行类型检查并构建。检查结果和历史可在 Actions 查看，也可以手动运行工作流重新检查。
 
 `main` 是主版本；较大改动可先创建分支，通过拉取请求合并。需要回退时使用 `git revert <提交编号>` 并推送，保留完整历史。
 
 仓库为私有仓库。原始参考照片、`.env`、依赖、构建缓存和原 Sites 本地配置不提交。网站设计素材、字体许可证和模型实验随源码保存。
 
-## 发布准备
+## 发布状态
 
-工作流保留了 GitHub Pages 部署步骤，但默认关闭：只有仓库变量 `PUBLISH_WEBSITE` 为 `true` 才会上传网页产物并执行部署。目前不设置该变量，也不启用 Pages。后续仅在用户明确授权公开发布后，确认账户对私有仓库 Pages 的支持情况，再配置发布。
+`.github/workflows/check.yml` 仅包含检查和构建，不包含部署步骤；Pages 已关闭。后续仅在用户明确授权公开发布后，再配置托管和自动部署。
 
-Astro 元数据与站点地图预设域名为 `https://acharya-yan.github.io/`，这是将来使用的目标地址，不代表网站已经上线。
+Astro 元数据与站点地图保留原有 Sites 域名配置，不代表网站已经上线。正式发布时，需要按最终托管地址更新 `chenyu-studio/astro.config.mjs` 和 `chenyu-studio/public/robots.txt`。
 
 目前保留已有电脑端设计。手机适配及完整视觉、交互验收仍待后续处理。个人资料和联系方式的维护方式见 [内容指南](chenyu-studio/CONTENT_GUIDE.md)。

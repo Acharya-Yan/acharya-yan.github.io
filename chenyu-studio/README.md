@@ -52,7 +52,7 @@ npm run dev
 
 2026-10-23：`npm run check` 通过（16 个文件，0 错误、0 警告、0 提示）；`npm run build` 成功生成 6 个页面及站点地图，产物位于 `dist/`。构建期间的 notes 集合为空提示对应尚未提供文章的正常空状态，不影响构建。依赖安装审计报告为 0 个已知漏洞。以上为编译结果，不代表浏览器视觉或交互验收。
 
-2026-10-28：配置私有 GitHub 版本管理和自动检查。用户选择暂不公开；Pages 部署默认关闭。站点元数据和站点地图预设 `https://acharya-yan.github.io/` 作为未来发布地址，并不代表已经上线。`.openai/hosting.json` 仅在本地保留原 Sites 配置，不提交到 GitHub；检查与部署准备位于根目录 `.github/workflows/deploy.yml`。
+2026-10-28：配置私有 GitHub 仓库 `Acharya-Yan/personal-website` 和自动检查。用户选择暂不公开；Pages 已关闭，工作流仅检查和构建。站点元数据和站点地图保留原有 Sites 域名，并不代表已经上线。`.openai/hosting.json` 仅在本地保留原 Sites 配置，不提交到 GitHub；检查工作流位于根目录 `.github/workflows/check.yml`。
 
 作品、履历、文章和联系方式仍需真实内容。当前仅“我的线上工作室”这一正在制作的项目有内容，其状态明确标记为进行中。`site.showDrafts` 当前为 true；对外发布时可改成 false，并将需要展示的 Markdown 设置为 `draft: false`。
 
