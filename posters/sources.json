@@ -1,0 +1,93 @@
+[
+  {
+    "title": "社交网络",
+    "file": "movies/the-social-network.jpg",
+    "variant": "经典英文院线海报",
+    "width": 479,
+    "height": 755,
+    "format": "JPEG",
+    "bytes": 75540,
+    "sha256": "6d4f496742341a66ab0a951ff4ee320709c4f3ee4ccd0bfd7eca61d9e26a66f9",
+    "source_page": "https://www.impawards.com/2010/social_network.html",
+    "image_url": "https://www.impawards.com/2010/posters/social_network.jpg",
+    "downloaded_on": "2026-10-28"
+  },
+  {
+    "title": "奥德赛（诺兰，2026）",
+    "file": "movies/the-odyssey.jpg",
+    "variant": "官方数字发行海报",
+    "width": 2000,
+    "height": 3000,
+    "format": "JPEG",
+    "bytes": 1533470,
+    "sha256": "1f3e5108ad7f41a3be8cc3c8fb267cbe86b8bcf33260840d27e81c42f1bf4be4",
+    "source_page": "https://www.universalpicturesathome.com/movies/the-odyssey-2026",
+    "image_url": "https://images.contentstack.io/v3/assets/blt13adb7e2033fcee5/bltdeb127bc976d0210/6acd0eb4e271b4776a0067d5/TheOdyssey_keyart_digital_poster_2000x3000.jpg",
+    "downloaded_on": "2026-10-28"
+  },
+  {
+    "title": "花束般的恋爱",
+    "file": "movies/we-made-a-beautiful-bouquet.jpg",
+    "variant": "日文院线海报",
+    "width": 566,
+    "height": 800,
+    "format": "JPEG",
+    "bytes": 75865,
+    "sha256": "f7ee8e0e54fce4ed88d5713f7b17f0632a5ed60bf45a4ba3b3678bc751030785",
+    "source_page": "https://eiga.com/movie/92102/photo/",
+    "image_url": "https://media.eiga.com/images/movie/92102/photo/305c59849a277128.jpg",
+    "downloaded_on": "2026-10-28"
+  },
+  {
+    "title": "Apex Legends",
+    "file": "games/apex-legends.jpg",
+    "variant": "Steam 竖版宣传封面",
+    "width": 600,
+    "height": 900,
+    "format": "JPEG",
+    "bytes": 317529,
+    "sha256": "46cb3e9fa8e3a0188175dc005e122221db12424a7b64f98a452a198e8e0be8e9",
+    "source_page": "https://store.steampowered.com/app/1172470/Apex_Legends/",
+    "image_url": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1172470/library_600x900_2x.jpg",
+    "downloaded_on": "2026-10-28"
+  },
+  {
+    "title": "GTA VI",
+    "file": "games/gta-vi.jpg",
+    "variant": "官方封面竖版",
+    "width": 1080,
+    "height": 1920,
+    "format": "JPEG",
+    "bytes": 911335,
+    "sha256": "452fcad03eeaa5da69c85d373696cc8923e4e59da941a435cbb32e1c4a3e0935",
+    "source_page": "https://www.rockstargames.com/VI/media/artwork-wallpapers",
+    "image_url": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_portrait.0_q101pt77mgu.jpg",
+    "downloaded_on": "2026-10-28"
+  },
+  {
+    "title": "羊蹄山之魂",
+    "file": "games/ghost-of-yotei.jpg",
+    "variant": "官方主视觉（无文字）",
+    "width": 2400,
+    "height": 2323,
+    "format": "JPEG",
+    "bytes": 1642366,
+    "sha256": "6ceb17aa9eefed5fa7dabd01aa5e244e1c899a93122b30a7c8b7322a547d445f",
+    "source_page": "https://www.playstation.com/en-us/games/ghost-of-yotei/",
+    "image_url": "https://gmedia.playstation.com/is/image/SIEPDC/ghost-of-yotei-hero-mobile-01-ps5-en-27sept24?$2400px$",
+    "downloaded_on": "2026-10-28"
+  },
+  {
+    "title": "羊蹄山之魂",
+    "file": "games/ghost-of-yotei-box-art.png",
+    "variant": "官方 PS5 盒装封面（含标题）",
+    "width": 1600,
+    "height": 2017,
+    "format": "PNG",
+    "bytes": 3938751,
+    "sha256": "3f232dc54ffac5762be5c1039299fd135b0278583626fb69466cb7431853a0df",
+    "source_page": "https://www.playstation.com/en-us/games/ghost-of-yotei/",
+    "image_url": "https://gmedia.playstation.com/is/image/SIEPDC/ghost-of-yotei-packshot-ps5-01-24jul25?$1600px--t$",
+    "downloaded_on": "2026-10-28"
+  }
+]
