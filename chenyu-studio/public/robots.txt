@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://chenyu-studio.over-tt.chatgpt.site/sitemap-index.xml
+Sitemap: https://acharya-yan.github.io/sitemap-index.xml
