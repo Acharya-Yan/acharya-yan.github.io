@@ -59,16 +59,18 @@ export default function StudioEntrance({ onComplete, onFadeComplete, onPrepare, 
         }
         ctx.drawImage(images[wallArtworks.length + index], 0, 0, 100, 100);
         if (index === 1 && light) {
-          ctx.fillStyle = '#ffe8adb8'; ctx.beginPath(); [[76.6,7.2],[83.9,2.4],[89.2,29.8],[81,29.6]].forEach(([px,py],n)=>n ? ctx.lineTo(px,py):ctx.moveTo(px,py)); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = '#fff4dfad'; ctx.beginPath(); [[76.6,7.2],[83.9,2.4],[89.2,29.8],[81,29.6]].forEach(([px,py],n)=>n ? ctx.lineTo(px,py):ctx.moveTo(px,py)); ctx.closePath(); ctx.fill();
         }
         ctx.restore();
       });
-      // Bake the warm side light once, rather than recompositing masks on every camera frame.
+      // Bake the high, softly neutral wall light once instead of compositing every frame.
       ctx.globalCompositeOperation = 'multiply';
       ctx.globalAlpha = light ? 1 : .12;
-      const glow = ctx.createRadialGradient(width * .76, height * .44, 0, width * .76, height * .44, width * .7);
-      glow.addColorStop(0, '#ffcf8080'); glow.addColorStop(.5, '#ffe6b533'); glow.addColorStop(1, '#ffffff00');
-      ctx.fillStyle = glow; ctx.fillRect(0, 0, width, height); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+      ctx.save(); ctx.translate(width * .72, height * .24); ctx.scale(width * .7, height * .55);
+      const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+      glow.addColorStop(0, '#fff1dc80'); glow.addColorStop(.36, '#fff5e64d'); glow.addColorStop(.67, '#fff9f024'); glow.addColorStop(1, '#fff9f000');
+      ctx.fillStyle = glow; ctx.fillRect(-2, -2, 4, 4); ctx.restore();
+      ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
       // Feather the room into the viewport, rather than exposing a colored rectangular tile.
       ctx.globalCompositeOperation = 'destination-in';
       const edgeX = ctx.createLinearGradient(0, 0, width, 0);
