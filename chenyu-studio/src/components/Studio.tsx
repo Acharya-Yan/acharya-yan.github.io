@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
 import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring } from 'motion/react';
 import { clamp, studioPlane, studioView } from '../lib/space/perspective';
-import { artworkAim, artworkLensZoom, wallPlane, type WallArtwork } from '../data/gallery';
+import { artworkAim, wallPlane, type WallArtwork } from '../data/gallery';
 import WallGallery from './WallGallery';
+import StudioEntrance from './StudioEntrance';
 
 type Target = 'about' | 'work' | 'notes' | 'contact' | 'camera' | 'lamp';
 type LensSubject = { kind: 'portrait' } | { kind: 'artwork'; artwork: WallArtwork };
@@ -40,7 +41,6 @@ export default function Studio() {
   const [dragging, setDragging] = useState(false);
   const [stageWidth, setStageWidth] = useState(1000);
   const [introComplete, setIntroComplete] = useState(false);
-  const [introSkipped, setIntroSkipped] = useState(false);
   const [loaded, setLoaded] = useState<string[]>([]);
   const [failed, setFailed] = useState(false);
   const [blinkReady, setBlinkReady] = useState(false);
@@ -53,7 +53,7 @@ export default function Studio() {
   const [announcement, setAnnouncement] = useState('');
   const reduceMotion = useReducedMotion();
   const ready = loaded.length === 4 && !failed;
-  const moving = ready && visible && !paused && !reduceMotion;
+  const moving = ready && introComplete && visible && !paused && !reduceMotion;
   const rawX = useMotionValue(0);
   const rawY = useMotionValue(0);
   const rawZoom = useMotionValue(1);
@@ -75,10 +75,7 @@ export default function Studio() {
   };
   const transition = { duration: reduceMotion ? 0 : 0.45, ease: [0.22, 1, 0.36, 1] as const };
 
-  // The monitor center in the shared canvas: desk origin + its local screen center.
-  const monitorCloseup = { scale: 5.4, x: '17.7%', y: '16.9%' };
-  const fullRoom = { scale: 1, x: '0%', y: '0%' };
-  const skipEntrance = () => { setIntroSkipped(true); setIntroComplete(true); };
+  const skipEntrance = () => setIntroComplete(true);
   useEffect(() => {
     if (reduceMotion || failed) skipEntrance();
   }, [reduceMotion, failed]);
@@ -233,11 +230,8 @@ export default function Studio() {
         else changeZoom(event.key === '-' ? .89 : 1.12);
       }}>
       <div className="scene-accessible-description sr-only">黑白漫画工作室：严晨宇坐在桌前，背后的墙上错落挂着三张电影海报、三张游戏海报和三张音乐图片。点击相机进入人物取景，点击海报进入海报取景，点击音乐封面播放或暂停。右侧摄影灯控制侧光与投影。</div>
-      <motion.div className="scene-entrance" initial={monitorCloseup}
-        animate={ready || introSkipped || reduceMotion ? fullRoom : monitorCloseup}
-        transition={{ duration: introSkipped || reduceMotion ? 0 : 2.8, delay: introSkipped || reduceMotion ? 0 : .2, ease: [.16, 1, .3, 1] }}
-        onAnimationComplete={() => { if (ready) setIntroComplete(true); }}>
-      <motion.div className="scene-canvas" animate={{ scale: selectedArtwork ? artworkLensZoom(selectedArtwork) : cameraMode ? 1.65 : 1, x: cameraMode && !selectedArtwork ? '16.5%' : '0%', y: cameraMode && !selectedArtwork ? '-3.25%' : '0%' }} transition={transition} style={{ transformOrigin: '50% 50%' }}>
+      <div className="scene-entrance" style={{ visibility: introComplete && !selectedArtwork ? 'visible' : 'hidden' }}>
+      <motion.div className="scene-canvas" animate={{ scale: cameraMode && !selectedArtwork ? 1.65 : 1, x: cameraMode && !selectedArtwork ? '16.5%' : '0%', y: cameraMode && !selectedArtwork ? '-3.25%' : '0%' }} transition={transition} style={{ transformOrigin: '50% 50%' }}>
         {!ready && <img className="studio-poster gallery-studio-poster" src="/assets/studio-poster.webp" width="1448" height="1086" alt="严晨宇的黑白漫画工作室" fetchPriority="high" />}
         <div className="scene-rig" style={{ perspective: stageWidth * studioView.perspective }}>
         <motion.div className="scene-aim" style={{ transformOrigin: `50% 50% ${stageWidth * studioView.perspective}px`, rotateX: reduceMotion ? aimPitch : aimedX, rotateY: reduceMotion ? aimYaw : aimedY }}>
@@ -285,8 +279,10 @@ export default function Studio() {
       <div className="studio-floor-shadows" aria-hidden="true" />
       <div className="studio-ambient-shade" aria-hidden="true" />
       <div className="studio-key-light" aria-hidden="true" />
-      </motion.div>
+      </div>
+      {!introComplete && !reduceMotion && <StudioEntrance onComplete={skipEntrance} />}
       {!introComplete && ready && <button type="button" className="entrance-skip" onClick={skipEntrance} aria-label="跳过开场运镜"><Glyph name="close" size={18}/></button>}
+      {selectedArtwork && <StudioEntrance subject={selectedArtwork} light={light} onComplete={exitCamera} />}
       <AnimatePresence>
         {cameraMode && <motion.div id="camera-viewfinder" className={`viewfinder ${selectedArtwork ? 'viewfinder-artwork' : 'viewfinder-portrait'}`} role="region" aria-label={selectedArtwork ? `海报取景：《${selectedArtwork.title}》` : '人物取景：严晨宇'} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={transition}>
           <div className="viewfinder-top"><span><span className="camera-dot"/>取景中</span><span>{selectedArtwork ? '海报取景' : '人物取景'}</span></div>
