@@ -31,6 +31,7 @@ export default function Studio() {
   const cameraButton = useRef<HTMLButtonElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
   const stage = useRef<HTMLDivElement>(null);
+  const world = useRef<HTMLDivElement>(null);
   const drag = useRef<{ id: number; x: number; y: number; yaw: number; pitch: number } | null>(null);
   const dragged = useRef(false);
   const lensReturn = useRef<{ yaw: number; pitch: number; zoom: number; element: HTMLElement | null } | null>(null);
@@ -41,6 +42,7 @@ export default function Studio() {
   const [dragging, setDragging] = useState(false);
   const [stageWidth, setStageWidth] = useState(1000);
   const [introComplete, setIntroComplete] = useState(false);
+  const [introRevealing, setIntroRevealing] = useState(false);
   const [loaded, setLoaded] = useState<string[]>([]);
   const [failed, setFailed] = useState(false);
   const [blinkReady, setBlinkReady] = useState(false);
@@ -77,6 +79,12 @@ export default function Studio() {
 
   const skipEntrance = () => setIntroComplete(true);
   useEffect(() => {
+    if (!introRevealing || introComplete) return;
+    // Keep the final canvas frame while the already-painted live scene is revealed.
+    const timer = setTimeout(skipEntrance, 1000);
+    return () => clearTimeout(timer);
+  }, [introRevealing, introComplete]);
+  useEffect(() => {
     if (reduceMotion || failed) skipEntrance();
   }, [reduceMotion, failed]);
   useEffect(() => {
@@ -87,9 +95,9 @@ export default function Studio() {
   }, [introComplete]);
 
   useEffect(() => {
-    if (!stage.current) return;
+    if (!world.current) return;
     const observer = new ResizeObserver(([entry]) => setStageWidth(Math.max(1, entry.contentRect.width)));
-    observer.observe(stage.current);
+    observer.observe(world.current);
     return () => observer.disconnect();
   }, []);
 
@@ -213,7 +221,7 @@ export default function Studio() {
     aria-label={label} tabIndex={cameraMode ? -1 : 0}
   ><span className="hotspot-marker" aria-hidden="true"/><span className="hotspot-label">{hints[target]}</span></a>;
 
-  return <div className={`studio ${cameraMode ? 'is-camera' : ''} ${selectedArtwork ? 'is-artwork-view' : ''} ${light ? 'light-on' : 'light-off'} ${showHints ? 'show-hints' : ''} ${moving ? 'is-moving' : ''} ${dragging ? 'is-dragging' : ''}`} ref={root}>
+  return <div className={`studio ${cameraMode ? 'is-camera' : ''} ${selectedArtwork ? 'is-artwork-view' : ''} ${light ? 'light-on' : 'light-off'} ${showHints ? 'show-hints' : ''} ${moving ? 'is-moving' : ''} ${dragging ? 'is-dragging' : ''} ${introRevealing ? 'is-revealing' : ''}`} ref={root}>
     <div className="studio-window" ref={stage} tabIndex={0} role="region" aria-label="工作室 2.5D 视图" aria-describedby="studio-view-instructions"
       onPointerDownCapture={() => { if (!introComplete) skipEntrance(); }}
       onPointerDown={startDrag} onPointerMove={point} onPointerUp={stopDrag} onPointerCancel={stopDrag} onLostPointerCapture={stopDrag}
@@ -230,7 +238,7 @@ export default function Studio() {
         else changeZoom(event.key === '-' ? .89 : 1.12);
       }}>
       <div className="scene-accessible-description sr-only">黑白漫画工作室：严晨宇坐在桌前，背后的墙上错落挂着三张电影海报、三张游戏海报和三张音乐图片。点击相机进入人物取景，点击海报进入海报取景，点击音乐封面播放或暂停。右侧摄影灯控制侧光与投影。</div>
-      <div className="scene-entrance" style={{ visibility: introComplete && !selectedArtwork ? 'visible' : 'hidden' }}>
+      <div ref={world} className="scene-entrance" style={{ visibility: !selectedArtwork ? 'visible' : 'hidden' }}>
       <motion.div className="scene-canvas" animate={{ scale: cameraMode && !selectedArtwork ? 1.65 : 1, x: cameraMode && !selectedArtwork ? '16.5%' : '0%', y: cameraMode && !selectedArtwork ? '-3.25%' : '0%' }} transition={transition} style={{ transformOrigin: '50% 50%' }}>
         {!ready && <img className="studio-poster gallery-studio-poster" src="/assets/studio-poster.webp" width="1448" height="1086" alt="严晨宇的黑白漫画工作室" fetchPriority="high" />}
         <div className="scene-rig" style={{ perspective: stageWidth * studioView.perspective }}>
@@ -280,7 +288,7 @@ export default function Studio() {
       <div className="studio-ambient-shade" aria-hidden="true" />
       <div className="studio-key-light" aria-hidden="true" />
       </div>
-      {!introComplete && !reduceMotion && <StudioEntrance onComplete={skipEntrance} />}
+      {!introComplete && !reduceMotion && <StudioEntrance onComplete={() => setIntroRevealing(true)} onFadeComplete={skipEntrance} />}
       {!introComplete && ready && <button type="button" className="entrance-skip" onClick={skipEntrance} aria-label="跳过开场运镜"><Glyph name="close" size={18}/></button>}
       {selectedArtwork && <StudioEntrance subject={selectedArtwork} light={light} onComplete={exitCamera} />}
       <AnimatePresence>

@@ -111,3 +111,15 @@
 .studio.is-dragging .avatar-breath{animation-play-state:paused}
 
 .studio-lens-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none;background:#fff}
+
+/* The viewport is the only frame; the 4:3 room itself never clips its moving layers. */
+.studio-entry{padding:0}
+.studio-entry .studio{width:100vw;height:100svh;max-width:none}
+.studio-entry .studio-window{height:100%;aspect-ratio:auto;border-radius:0;box-shadow:none}
+.studio-entry .scene-entrance{inset:auto;left:50%;top:50%;width:min(100vw,133.33333svh);height:min(75vw,100svh);transform:translate(-50%,-50%)}
+.studio-entry .viewfinder{inset:4%;border:0}
+.studio-entry .studio-window:after{border-radius:0}
+.studio-entrance-canvas{opacity:1;transition:opacity .32s ease-out}
+.is-revealing .studio-entrance-canvas{opacity:0}
+.studio-entry .studio-music-host{position:fixed;bottom:60px;transform:none;z-index:10}
+@media(prefers-reduced-motion:reduce){.studio-entry .scene-entrance{transform:translate(-50%,-50%)!important}.studio-entrance-canvas{transition:none}}

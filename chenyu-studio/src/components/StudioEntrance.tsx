@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { wallArtworks, type WallArtwork } from '../data/gallery';
 
 /** A bounded raster buffer avoids scaling an entire masked 3D tree into giant GPU tiles. */
-export default function StudioEntrance({ onComplete, subject, light = true }: { onComplete: () => void; subject?: WallArtwork; light?: boolean }) {
+export default function StudioEntrance({ onComplete, onFadeComplete, subject, light = true }: { onComplete: () => void; onFadeComplete?: () => void; subject?: WallArtwork; light?: boolean }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const complete = useRef(onComplete);
   complete.current = onComplete;
@@ -20,10 +20,12 @@ export default function StudioEntrance({ onComplete, subject, light = true }: { 
       if (cancelled) return;
       const box = output.getBoundingClientRect();
       // Cap both DPR and total dimensions; the output never grows with the camera zoom.
-      const width = Math.round(Math.min(1920, box.width * Math.min(devicePixelRatio, 1.5)));
+      const outputWidth = Math.round(Math.min(1920, box.width * Math.min(devicePixelRatio, 1.5)));
+      const outputHeight = Math.round(outputWidth * box.height / box.width);
+      const width = Math.round(Math.min(outputWidth, outputHeight * 4 / 3));
       const height = Math.round(width * .75);
       if (!width || !height) { finish(); return; }
-      output.width = width; output.height = height;
+      output.width = outputWidth; output.height = outputHeight;
       const scene = document.createElement('canvas'); scene.width = width; scene.height = height;
       const ctx = scene.getContext('2d'), screen = output.getContext('2d', { alpha: false });
       if (!ctx || !screen) { finish(); return; }
@@ -57,14 +59,22 @@ export default function StudioEntrance({ onComplete, subject, light = true }: { 
       const glow = ctx.createRadialGradient(width * .76, height * .44, 0, width * .76, height * .44, width * .7);
       glow.addColorStop(0, '#ffcf8080'); glow.addColorStop(.5, '#ffe6b533'); glow.addColorStop(1, '#ffffff00');
       ctx.fillStyle = glow; ctx.fillRect(0, 0, width, height); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+      // Feather the room into the viewport, rather than exposing a colored rectangular tile.
+      ctx.globalCompositeOperation = 'destination-in';
+      const edgeX = ctx.createLinearGradient(0, 0, width, 0);
+      edgeX.addColorStop(0, '#0000'); edgeX.addColorStop(.08, '#000'); edgeX.addColorStop(.92, '#000'); edgeX.addColorStop(1, '#0000');
+      ctx.fillStyle = edgeX; ctx.fillRect(0, 0, width, height);
+      const edgeY = ctx.createLinearGradient(0, 0, 0, height);
+      edgeY.addColorStop(0, '#0000'); edgeY.addColorStop(.08, '#000'); edgeY.addColorStop(.92, '#000'); edgeY.addColorStop(1, '#0000');
+      ctx.fillStyle = edgeY; ctx.fillRect(0, 0, width, height); ctx.globalCompositeOperation = 'source-over';
       if (subject) {
         const w = width * subject.size / 100, h = w * subject.height / subject.width;
-        const zoom = Math.min(width * .66 / w, height * .64 / h);
+        const zoom = Math.min(outputWidth * .66 / w, outputHeight * .64 / h);
         const cx = width * subject.left / 100 + w / 2, cy = height * subject.top / 100 + h / 2;
-        screen.fillStyle = '#fff'; screen.fillRect(0, 0, width, height);
-        screen.drawImage(scene, width / 2 - cx * zoom, height / 2 - cy * zoom, width * zoom, height * zoom);
+        screen.fillStyle = '#fff'; screen.fillRect(0, 0, outputWidth, outputHeight);
+        screen.drawImage(scene, outputWidth / 2 - cx * zoom, outputHeight / 2 - cy * zoom, width * zoom, height * zoom);
         // Keep the focused print sharp; only its surrounding wall uses the small snapshot.
-        screen.save(); screen.translate(width / 2, height / 2); screen.rotate(subject.tilt * Math.PI / 180);
+        screen.save(); screen.translate(outputWidth / 2, outputHeight / 2); screen.rotate(subject.tilt * Math.PI / 180);
         screen.fillStyle = '#faf8f2'; screen.fillRect(-w * zoom / 2 - 2 * zoom, -h * zoom / 2 - 2 * zoom, (w + 4) * zoom, (h + 4) * zoom);
         screen.drawImage(images[wallArtworks.findIndex(a => a.id === subject.id)], -w * zoom / 2, -h * zoom / 2, w * zoom, h * zoom);
         if (subject.id !== 'yotei') { screen.strokeStyle = '#292925'; screen.lineWidth = 1.5 * zoom; screen.strokeRect(-w * zoom / 2 - 2 * zoom, -h * zoom / 2 - 2 * zoom, (w + 4) * zoom, (h + 4) * zoom); }
@@ -79,9 +89,9 @@ export default function StudioEntrance({ onComplete, subject, light = true }: { 
         const progress = Math.min(1, (now - start) / 2800);
         const remaining = (1 - progress) ** 4;
         const zoom = 1 + 4.4 * remaining;
-        const x = width * (.177 * remaining + (1 - zoom) / 2);
-        const y = height * (.169 * remaining + (1 - zoom) / 2);
-        screen.fillStyle = '#fff'; screen.fillRect(0, 0, width, height);
+        const x = outputWidth / 2 - width * zoom / 2 + width * .177 * remaining;
+        const y = outputHeight / 2 - height * zoom / 2 + height * .169 * remaining;
+        screen.fillStyle = '#fff'; screen.fillRect(0, 0, outputWidth, outputHeight);
         screen.drawImage(scene, x, y, width * zoom, height * zoom);
         if (progress < 1) frame = requestAnimationFrame(draw);
         else { scene.width = 0; scene.height = 0; finish(); }
@@ -92,5 +102,5 @@ export default function StudioEntrance({ onComplete, subject, light = true }: { 
     if (!subject) window.addEventListener('resize', finish, { once: true });
     return () => { cancelled = true; cancelAnimationFrame(frame); window.removeEventListener('resize', finish); output.width = 0; output.height = 0; };
   }, [subject, light]);
-  return <canvas ref={canvas} className={subject ? 'studio-lens-canvas' : 'studio-entrance-canvas'} aria-hidden="true" />;
+  return <canvas ref={canvas} className={subject ? 'studio-lens-canvas' : 'studio-entrance-canvas'} aria-hidden="true" onTransitionEnd={event => { if (!subject && event.propertyName === 'opacity') onFadeComplete?.(); }} />;
 }
