@@ -39,7 +39,8 @@ export default function Studio() {
   const [musicHost, setMusicHost] = useState<HTMLDivElement | null>(null);
   const [dragging, setDragging] = useState(false);
   const [stageWidth, setStageWidth] = useState(1000);
-  const [hovered, setHovered] = useState<Target | null>(null);
+  const [introComplete, setIntroComplete] = useState(false);
+  const [introSkipped, setIntroSkipped] = useState(false);
   const [loaded, setLoaded] = useState<string[]>([]);
   const [failed, setFailed] = useState(false);
   const [blinkReady, setBlinkReady] = useState(false);
@@ -73,6 +74,20 @@ export default function Studio() {
     };
   };
   const transition = { duration: reduceMotion ? 0 : 0.45, ease: [0.22, 1, 0.36, 1] as const };
+
+  // The monitor center in the shared canvas: desk origin + its local screen center.
+  const monitorCloseup = { scale: 5.4, x: '17.7%', y: '16.9%' };
+  const fullRoom = { scale: 1, x: '0%', y: '0%' };
+  const skipEntrance = () => { setIntroSkipped(true); setIntroComplete(true); };
+  useEffect(() => {
+    if (reduceMotion || failed) skipEntrance();
+  }, [reduceMotion, failed]);
+  useEffect(() => {
+    if (introComplete) return;
+    const skip = (event: KeyboardEvent) => { if (event.key === 'Escape') skipEntrance(); };
+    document.addEventListener('keydown', skip);
+    return () => document.removeEventListener('keydown', skip);
+  }, [introComplete]);
 
   useEffect(() => {
     if (!stage.current) return;
@@ -127,7 +142,7 @@ export default function Studio() {
   }
   function enterLens(subject: LensSubject, trigger?: HTMLElement) {
     if (!lensReturn.current) lensReturn.current = { yaw: rawX.get(), pitch: rawY.get(), zoom: rawZoom.get(), element: trigger ?? document.activeElement as HTMLElement | null };
-    setLensSubject(subject); setHovered(null);
+    setLensSubject(subject);
     rawX.set(0); rawY.set(0); rawZoom.set(1);
     const aim = subject.kind === 'artwork' ? artworkAim(subject.artwork, 1) : { yaw: 0, pitch: 0 };
     aimYaw.set(aim.yaw); aimPitch.set(aim.pitch);
@@ -161,7 +176,7 @@ export default function Studio() {
     if (!dragged.current && Math.hypot(dx, dy) < 6) return;
     dragged.current = true;
     event.currentTarget.setPointerCapture(event.pointerId);
-    setDragging(true); setHovered(null);
+    setDragging(true);
     rawX.set(clamp(start.yaw + dx * .045, -studioView.yaw, studioView.yaw));
     rawY.set(clamp(start.pitch - dy * .018, -studioView.pitch, studioView.pitch));
   }
@@ -184,31 +199,31 @@ export default function Studio() {
     function wheel(event: WheelEvent) {
       // Only claim zoom gestures over the drawing; the rest of the homepage scrolls normally.
       if (event.ctrlKey || event.metaKey) return;
-      event.preventDefault(); changeZoom(Math.exp(-event.deltaY * .0008));
+      event.preventDefault();
+      if (!introComplete) { skipEntrance(); return; }
+      changeZoom(Math.exp(-event.deltaY * .0008));
     }
     element.addEventListener('wheel', wheel, { passive: false });
     return () => element.removeEventListener('wheel', wheel);
-  }, [ready, cameraMode]);
+  }, [ready, cameraMode, introComplete]);
   function markLoaded(name: string) { setLoaded(previous => previous.includes(name) ? previous : [...previous, name]); }
   function enterCamera(event?: { currentTarget: HTMLButtonElement }) {
     enterLens({ kind: 'portrait' }, event?.currentTarget ?? cameraButton.current ?? undefined);
   }
   function toggleLight() { setLight(value => !value); setAnnouncement(light ? '摄影灯已关闭' : '摄影灯已打开'); }
-  const hintEvents = (target: Target) => ({
-    onPointerEnter: () => setHovered(target), onPointerLeave: () => setHovered(null),
-    onFocus: () => setHovered(target), onBlur: () => setHovered(null),
-  });
   const hotspot = (target: Target, href: string, style: CSSProperties, label: string) => <a
     className={`scene-hotspot hotspot-${target}`} href={href} style={style}
-    aria-label={label} tabIndex={cameraMode ? -1 : 0} {...hintEvents(target)}
+    aria-label={label} tabIndex={cameraMode ? -1 : 0}
   ><span className="hotspot-marker" aria-hidden="true"/><span className="hotspot-label">{hints[target]}</span></a>;
 
   return <div className={`studio ${cameraMode ? 'is-camera' : ''} ${selectedArtwork ? 'is-artwork-view' : ''} ${light ? 'light-on' : 'light-off'} ${showHints ? 'show-hints' : ''} ${moving ? 'is-moving' : ''} ${dragging ? 'is-dragging' : ''}`} ref={root}>
     <div className="studio-window" ref={stage} tabIndex={0} role="region" aria-label="工作室 2.5D 视图" aria-describedby="studio-view-instructions"
+      onPointerDownCapture={() => { if (!introComplete) skipEntrance(); }}
       onPointerDown={startDrag} onPointerMove={point} onPointerUp={stopDrag} onPointerCancel={stopDrag} onLostPointerCapture={stopDrag}
-      onPointerLeave={() => { if (!dragged.current) drag.current = null; setHovered(null); }} onDragStart={event => event.preventDefault()}
+      onPointerLeave={() => { if (!dragged.current) drag.current = null; }} onDragStart={event => event.preventDefault()}
       onClickCapture={event => { if (dragged.current && event.detail > 0) { event.preventDefault(); event.stopPropagation(); } }}
       onKeyDown={event => {
+        if (!introComplete) { skipEntrance(); return; }
         if (event.target !== event.currentTarget || cameraMode || !ready) return;
         if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', '+', '=', '-', '0', 'Escape'].includes(event.key)) return;
         event.preventDefault();
@@ -218,17 +233,19 @@ export default function Studio() {
         else changeZoom(event.key === '-' ? .89 : 1.12);
       }}>
       <div className="scene-accessible-description sr-only">黑白漫画工作室：严晨宇坐在桌前，背后的墙上错落挂着三张电影海报、三张游戏海报和三张音乐图片。点击相机进入人物取景，点击海报进入海报取景，点击音乐封面播放或暂停。右侧摄影灯控制侧光与投影。</div>
+      <motion.div className="scene-entrance" initial={monitorCloseup}
+        animate={ready || introSkipped || reduceMotion ? fullRoom : monitorCloseup}
+        transition={{ duration: introSkipped || reduceMotion ? 0 : 2.8, delay: introSkipped || reduceMotion ? 0 : .2, ease: [.16, 1, .3, 1] }}
+        onAnimationComplete={() => { if (ready) setIntroComplete(true); }}>
       <motion.div className="scene-canvas" animate={{ scale: selectedArtwork ? artworkLensZoom(selectedArtwork) : cameraMode ? 1.65 : 1, x: cameraMode && !selectedArtwork ? '16.5%' : '0%', y: cameraMode && !selectedArtwork ? '-3.25%' : '0%' }} transition={transition} style={{ transformOrigin: '50% 50%' }}>
         {!ready && <img className="studio-poster gallery-studio-poster" src="/assets/studio-poster.webp" width="1448" height="1086" alt="严晨宇的黑白漫画工作室" fetchPriority="high" />}
         <div className="scene-rig" style={{ perspective: stageWidth * studioView.perspective }}>
         <motion.div className="scene-aim" style={{ transformOrigin: `50% 50% ${stageWidth * studioView.perspective}px`, rotateX: reduceMotion ? aimPitch : aimedX, rotateY: reduceMotion ? aimYaw : aimedY }}>
         <motion.div className="scene-room" style={{ rotateX: reduceMotion ? rawY : y, rotateY: reduceMotion ? rawX : x, scale: reduceMotion ? rawZoom : zoom }}>
-        <WallGallery selected={selectedArtwork?.id ?? null} onSelect={pointAtArtwork} disabled={!ready || cameraMode} planeStyle={{ transform: wallPlane(stageWidth), visibility: ready ? 'visible' : 'hidden' }} statusHost={musicHost} stageWidth={stageWidth} />
+        <WallGallery selected={selectedArtwork?.id ?? null} onSelect={pointAtArtwork} disabled={!ready || cameraMode || !introComplete} planeStyle={{ transform: wallPlane(stageWidth), visibility: ready ? 'visible' : 'hidden' }} statusHost={musicHost} stageWidth={stageWidth} />
         <div className="scene-layers" style={{ visibility: ready ? 'visible' : 'hidden' }} aria-hidden="true">
           <div className="scene-layer desk-layer" style={{ ...plane('desk'), opacity: selectedArtwork ? 0 : 1 }} aria-hidden="true">
             <img data-layer="desk" src="/assets/desk.webp" width="1448" height="1086" alt="" onLoad={() => markLoaded('desk')} onError={() => setFailed(true)} fetchPriority="high" />
-            <div className={`monitor-content ${hovered === 'work' ? 'screen-active' : ''}`}><span>WORK IN PROGRESS</span><strong>正在做的事</strong><span className="screen-rule"/><small>我的线上工作室</small></div>
-            <div className={`laptop-content ${hovered === 'notes' ? 'screen-active' : ''}`}><span>Notes</span><i/><i/><i/><small>写下来，慢慢想。</small></div>
           </div>
           <motion.div className="scene-layer lamp-layer" animate={{ opacity: cameraMode ? 0 : 1 }} transition={transition} style={plane('lamp')} aria-hidden="true">
             <img data-layer="lamp" src="/assets/lamp.webp" width="1448" height="1086" alt="" onLoad={() => markLoaded('lamp')} onError={() => setFailed(true)} />
@@ -245,20 +262,20 @@ export default function Studio() {
             <img data-layer="camera" src="/assets/camera.webp" width="1448" height="1086" alt="" onLoad={() => markLoaded('camera')} onError={() => setFailed(true)} />
           </motion.div>
         </div>
-        {!cameraMode && <div className="scene-targets">
+        {!cameraMode && <div className="scene-targets" inert={!introComplete}>
           <div className="scene-hit-plane" style={plane('desk')}>
           {hotspot('work', '/work/', { left: '42%', top: '16%', width: '22%', height: '16%' }, '主显示器：浏览作品')}
           {hotspot('notes', '/notes/', { left: '8.4%', top: '22%', width: '12%', height: '13%' }, '笔记本：阅读文字')}
-          {hotspot('contact', '/#contact', { left: '58.2%', top: '34%', width: '4.5%', height: '8%' }, '桌上的手机：联系我')}
+          {hotspot('contact', '/about/#contact', { left: '58.2%', top: '34%', width: '4.5%', height: '8%' }, '桌上的手机：联系我')}
           </div>
           <div className="scene-hit-plane" style={plane('avatar')}>
           {hotspot('about', '/about/', { left: '25%', top: '11%', width: '16%', height: '20%' }, '人物：关于严晨宇')}
           </div>
           <div className="scene-hit-plane" style={plane('camera')}>
-          <button ref={cameraButton} className="scene-hotspot hotspot-camera" style={{ left: '66%', top: '13%', width: '16%', height: '13%' }} type="button" aria-label="相机：进入取景模式" aria-expanded={cameraMode} aria-controls="camera-viewfinder" onClick={enterCamera} disabled={!ready} {...hintEvents('camera')}><span className="hotspot-marker" aria-hidden="true"/><span className="hotspot-label">{hints.camera}</span></button>
+          <button ref={cameraButton} className="scene-hotspot hotspot-camera" style={{ left: '66%', top: '13%', width: '16%', height: '13%' }} type="button" aria-label="相机：进入取景模式" aria-expanded={cameraMode} aria-controls="camera-viewfinder" onClick={enterCamera} disabled={!ready}><span className="hotspot-marker" aria-hidden="true"/><span className="hotspot-label">{hints.camera}</span></button>
           </div>
           <div className="scene-hit-plane" style={plane('lamp')}>
-          <button className="scene-hotspot hotspot-lamp" style={{ left: '82%', top: '4%', width: '10%', height: '22%' }} type="button" aria-label={light ? '关闭摄影灯' : '打开摄影灯'} aria-pressed={light} onClick={toggleLight} disabled={!ready} {...hintEvents('lamp')}><span className="hotspot-marker" aria-hidden="true"/><span className="hotspot-label">{light ? '关灯，休息一下' : '开灯，继续吧'}</span></button>
+          <button className="scene-hotspot hotspot-lamp" style={{ left: '82%', top: '4%', width: '10%', height: '22%' }} type="button" aria-label={light ? '关闭摄影灯' : '打开摄影灯'} aria-pressed={light} onClick={toggleLight} disabled={!ready}><span className="hotspot-marker" aria-hidden="true"/><span className="hotspot-label">{light ? '关灯，休息一下' : '开灯，继续吧'}</span></button>
           </div>
         </div>}
         </motion.div>
@@ -268,6 +285,8 @@ export default function Studio() {
       <div className="studio-floor-shadows" aria-hidden="true" />
       <div className="studio-ambient-shade" aria-hidden="true" />
       <div className="studio-key-light" aria-hidden="true" />
+      </motion.div>
+      {!introComplete && ready && <button type="button" className="entrance-skip" onClick={skipEntrance} aria-label="跳过开场运镜"><Glyph name="close" size={18}/></button>}
       <AnimatePresence>
         {cameraMode && <motion.div id="camera-viewfinder" className={`viewfinder ${selectedArtwork ? 'viewfinder-artwork' : 'viewfinder-portrait'}`} role="region" aria-label={selectedArtwork ? `海报取景：《${selectedArtwork.title}》` : '人物取景：严晨宇'} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={transition}>
           <div className="viewfinder-top"><span><span className="camera-dot"/>取景中</span><span>{selectedArtwork ? '海报取景' : '人物取景'}</span></div>
@@ -276,13 +295,12 @@ export default function Studio() {
           <div className="viewfinder-bottom"><span>{selectedArtwork?.title ?? "CHENYU'S STUDIO"}</span><button className="viewfinder-close" ref={closeButton} onClick={exitCamera}><Glyph name="close" size={14}/>退出取景 <kbd>Esc</kbd></button></div>
         </motion.div>}
       </AnimatePresence>
-      {failed && <p className="scene-error" role="status">互动素材暂时没加载好。可以通过顶部导航继续浏览。</p>}
+      {failed && <p className="scene-error" role="status">互动素材暂时没加载好。可以先<a href="/work/">浏览作品</a>，或<a href="/about/">认识一下我</a>。</p>}
     </div>
-    <div className="studio-caption"><span>一张桌子，我的小小世界。</span><span className="scene-index">STUDIO / 2026</span></div>
     <div ref={setMusicHost} className="studio-music-host" />
-    <p className="studio-view-instructions" id="studio-view-instructions">拖动环绕 · 点击海报取景 · 点击封面听歌<span className="sr-only">。滚轮缩放。聚焦视图后可用方向键环绕，加减键缩放，0 复位，取景时按 Escape 返回之前的视角。</span></p>
-    <div className="studio-controls" aria-label="工作室控制">
-      <button type="button" onClick={() => setShowHints(value => !value)} aria-pressed={showHints} disabled={cameraMode}><Glyph name="eye" size={16}/><span>{showHints ? '收起提示' : '探索空间'}</span></button>
+    <p className="studio-view-instructions sr-only" id="studio-view-instructions">拖动环绕 · 点击海报取景 · 点击封面听歌<span className="sr-only">。滚轮缩放。聚焦视图后可用方向键环绕，加减键缩放，0 复位，取景时按 Escape 返回之前的视角。</span></p>
+    <div className="studio-controls" aria-label="工作室控制" inert={!introComplete} style={{ opacity: introComplete ? 1 : 0 }}>
+      <button type="button" onClick={() => setShowHints(value => !value)} aria-pressed={showHints} disabled={cameraMode} aria-label={showHints ? '收起提示' : '探索空间'}><Glyph name="eye" size={16}/></button>
       <span className="control-divider"/>
       <button type="button" onClick={toggleLight} aria-pressed={light} aria-label={light ? '关闭摄影灯' : '打开摄影灯'} disabled={!ready}><Glyph name="sun" size={17}/></button>
       <button type="button" onClick={cameraMode ? exitCamera : enterCamera} aria-pressed={cameraMode} aria-label={cameraMode ? '退出取景模式' : '进入取景模式'} disabled={!ready}><Glyph name="camera" size={17}/></button>

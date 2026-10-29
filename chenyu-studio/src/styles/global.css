@@ -90,3 +90,17 @@
 @media(min-width:1600px){.hero-intro{padding-left:16px}.studio{max-width:1040px}.hero-intro h1{font-size:50px}.hero-english{font-size:49px}}
 @media(max-width:1200px){.primary-nav{gap:27px}.hero{grid-template-columns:minmax(255px,.75fr) minmax(0,1.6fr);gap:0}.hero-intro h1{font-size:34px}.hero-english{font-size:35px}.hero-description{font-size:13px}.studio{min-width:480px}.hero-aside{margin-top:38px}.featured-copy h3{font-size:26px}.page-heading h1>.serif{font-size:65px}.about-intro h1{font-size:36px}.about-avatar img{width:760px;left:calc(50% - 270px);top:0}.about-later>.serif{font-size:56px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}.scene-layer,.scene-canvas{will-change:auto}}
+
+/* A single, centered room is the homepage. Other pages retain their reading layout. */
+.immersive-home{overflow:hidden}
+.immersive-home #main{height:100svh}
+.studio-entry{height:100svh;display:flex;align-items:center;justify-content:center;padding:16px 24px 56px}
+.studio-entry .studio{width:min(calc(100vw - 48px),calc((100svh - 72px)*1.33333));max-width:1600px;min-width:0}
+.studio-entry .studio-window{background:transparent}
+.scene-entrance{position:absolute;inset:0;transform-origin:50% 50%;pointer-events:none;will-change:transform}
+.studio-entry .studio-controls{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);margin:0;z-index:10;transition:opacity .35s var(--ease)}
+.studio-entry .studio-music-host{position:absolute;bottom:0;left:0;right:0;transform:translateY(100%);margin:0;min-height:0}
+.studio-entry .studio-music-status{background:#fffffff2;padding:2px 12px;width:max-content;max-width:100%;margin:auto}
+.entrance-skip{position:absolute;bottom:18px;right:18px;z-index:8;width:36px;height:36px;display:grid;place-items:center;background:#ffffffd9;border-radius:50%}
+.studio-entry-fallback{position:absolute;width:min(100%,1200px);height:90svh;object-fit:contain;background:#fff}
+@media(prefers-reduced-motion:reduce){.scene-entrance{transform:none!important;will-change:auto}.studio-entry .studio-controls{transition:none}}

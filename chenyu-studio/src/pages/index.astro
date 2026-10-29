@@ -1,50 +1,10 @@
 ---
-import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Studio from '../components/Studio';
-import Contact from '../components/Contact.astro';
-import Icon from '../components/Icon.astro';
-import { site } from '../data/site';
-const works = (await getCollection('work', ({ data }) => site.showDrafts || !data.draft)).filter(work => work.data.featured);
-const notes = (await getCollection('notes', ({ data }) => site.showDrafts || !data.draft)).sort((a,b) => b.data.date.valueOf() - a.data.date.valueOf()).slice(0,3);
 ---
-<Base>
-  <section class="hero shell" aria-labelledby="hello-title">
-    <div class="hero-intro">
-      <h1 id="hello-title">你好，<br/>我是严晨宇<span class="title-period">。</span></h1>
-      <p class="hero-english serif">Make yourself<br/><em>at home.</em></p>
-      <p class="hero-description">欢迎来到我的线上工作室。<br/>这里会慢慢放进我的作品、文字，<br/>和一些日常。</p>
-      <a class="text-link intro-link" href="#directory">随便逛逛 <Icon name="down" size={17}/></a>
-      <p class="hero-aside"><span class="tiny-spark" aria-hidden="true"></span>试着点点房间里的东西。</p>
-    </div>
-    <div class="hero-art"><Studio client:load /><noscript><p class="no-script">工作室的互动需要 JavaScript。你仍可以通过顶部导航浏览全部内容。</p></noscript></div>
+<Base immersive>
+  <section class="studio-entry" aria-label="严晨宇的线上工作室">
+    <Studio client:load />
+    <noscript><img class="studio-entry-fallback" src="/assets/studio-poster.webp" width="1448" height="1086" alt="严晨宇的漫画工作室" /></noscript>
   </section>
-
-  <section id="directory" class="directory shell" aria-labelledby="directory-heading">
-    <div class="section-heading"><h2 id="directory-heading">从这里开始。</h2><span class="serif section-aside">A few things to explore</span></div>
-    <div class="directory-links">
-      <a href="/work/"><span class="directory-label">作品<span class="serif">Work</span></span><span class="directory-description">正在做的事，和已经走过的过程。</span><span class="circle-arrow"><Icon/></span></a>
-      <a href="/notes/"><span class="directory-label">文字<span class="serif">Notes</span></span><span class="directory-description">把想法写下来，留一点时间慢慢想。</span><span class="circle-arrow"><Icon/></span></a>
-      <a href="/about/"><span class="directory-label">关于<span class="serif">About</span></span><span class="directory-description">桌子之外，也认识一下我。</span><span class="circle-arrow"><Icon/></span></a>
-    </div>
-  </section>
-
-  <section class="home-work shell" aria-labelledby="work-heading">
-    <div class="section-heading"><h2 id="work-heading">从想法，到作品。</h2><a class="text-link" href="/work/">全部作品 <Icon size={17}/></a></div>
-    {works.length ? works.slice(0,2).map(work => <a class="featured-work" href={`/work/${work.id}/`}>
-      <div class="featured-art"><img src={work.data.cover} alt={work.data.coverAlt ?? work.data.title} width="1448" height="1086" loading="lazy" /><span class="art-open"><Icon size={22}/></span></div>
-      <div class="featured-copy"><div class="work-status"><span class="status-dot"/>{work.data.draft ? '正在搭建' : '已发布'}<span>{work.data.category}</span></div><h3>{work.data.title}</h3><p>{work.data.summary}</p><span class="text-link">看看制作过程 <Icon size={18}/></span></div>
-    </a>) : <p class="quiet-empty">作品正在整理。完成后，会从这里开始分享。</p>}
-  </section>
-
-  <section class="home-notes shell" aria-labelledby="notes-heading">
-    <div class="section-heading"><h2 id="notes-heading">偶尔，写一点。</h2><a class="text-link" href="/notes/">所有文字 <Icon size={17}/></a></div>
-    {notes.length ? <div class="note-list">{notes.map(note => <a class="note-row" href={`/notes/${note.id}/`}><time datetime={note.data.date.toISOString()}>{note.data.date.toLocaleDateString('zh-CN', { timeZone:'Asia/Shanghai' })}</time><h3>{note.data.title}</h3><Icon size={18}/></a>)}</div> : <div class="notes-empty"><span class="serif">A blank page,<br/><em>for what's next.</em></span><div><p>第一篇文字，还在酝酿。</p><span>这里留给以后的观察、想法和随记。</span></div></div>}
-  </section>
-
-  <section class="about-teaser shell">
-    <div class="about-mini-avatar" aria-hidden="true"><img src="/assets/avatar.webp" width="1448" height="1086" alt="" loading="lazy"/></div>
-    <div><h2>屏幕的另一边，是我。</h2><p>先从这张熟悉的桌子认识我。更多关于我的故事，<br/>之后慢慢告诉你。</p><a class="text-link" href="/about/">再认识一点 <Icon size={17}/></a></div>
-  </section>
-  <Contact />
 </Base>
