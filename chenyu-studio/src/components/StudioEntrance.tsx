@@ -1,8 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { wallArtworks, type WallArtwork } from '../data/gallery';
+import { createRasterCamera } from '../lib/space/raster-camera';
 
 /** A bounded raster buffer avoids scaling an entire masked 3D tree into giant GPU tiles. */
-export default function StudioEntrance({ onComplete, onFadeComplete, subject, light = true }: { onComplete: () => void; onFadeComplete?: () => void; subject?: WallArtwork; light?: boolean }) {
+export type CameraFrameStats = { renderer: string; frames: number; medianMs: number; p95Ms: number; over25Ms: number };
+export default function StudioEntrance({ onComplete, onFadeComplete, subject, light = true }: { onComplete: (stats?: CameraFrameStats) => void; onFadeComplete?: () => void; subject?: WallArtwork; light?: boolean }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const complete = useRef(onComplete);
   complete.current = onComplete;
@@ -10,6 +12,7 @@ export default function StudioEntrance({ onComplete, onFadeComplete, subject, li
     const output = canvas.current;
     if (!output) return;
     let cancelled = false, frame = 0;
+    let raster: ReturnType<typeof createRasterCamera> = null;
     const finish = () => { if (!cancelled) complete.current(); };
     const load = async (src: string) => {
       const image = new Image(); image.src = src;
@@ -27,8 +30,8 @@ export default function StudioEntrance({ onComplete, onFadeComplete, subject, li
       if (!width || !height) { finish(); return; }
       output.width = outputWidth; output.height = outputHeight;
       const scene = document.createElement('canvas'); scene.width = width; scene.height = height;
-      const ctx = scene.getContext('2d'), screen = output.getContext('2d', { alpha: false });
-      if (!ctx || !screen) { finish(); return; }
+      const ctx = scene.getContext('2d');
+      if (!ctx) { finish(); return; }
       ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, width, height);
       wallArtworks.forEach((art, index) => {
         const w = width * art.size / 100, h = w * art.height / art.width;
@@ -68,6 +71,8 @@ export default function StudioEntrance({ onComplete, onFadeComplete, subject, li
       edgeY.addColorStop(0, '#0000'); edgeY.addColorStop(.08, '#000'); edgeY.addColorStop(.92, '#000'); edgeY.addColorStop(1, '#0000');
       ctx.fillStyle = edgeY; ctx.fillRect(0, 0, width, height); ctx.globalCompositeOperation = 'source-over';
       if (subject) {
+        const screen = output.getContext('2d', { alpha: false });
+        if (!screen) { finish(); return; }
         const w = width * subject.size / 100, h = w * subject.height / subject.width;
         const zoom = Math.min(outputWidth * .66 / w, outputHeight * .64 / h);
         const cx = width * subject.left / 100 + w / 2, cy = height * subject.top / 100 + h / 2;
@@ -82,25 +87,42 @@ export default function StudioEntrance({ onComplete, onFadeComplete, subject, li
         scene.width = 0; scene.height = 0;
         return;
       }
-      let start = 0;
+      raster = createRasterCamera(output, scene);
+      const screen = raster ? null : output.getContext('2d', { alpha: false });
+      if (!raster && !screen) { finish(); return; }
+      if (raster) { scene.width = 0; scene.height = 0; }
+      let start = 0, previousFrame = 0, reported = false;
+      const frameTimes: number[] = [];
       const draw = (now: number) => {
         if (cancelled) return;
+        if (previousFrame) frameTimes.push(now - previousFrame);
+        previousFrame = now;
         if (!start) start = now;
         const progress = Math.min(1, (now - start) / 2800);
-        const remaining = (1 - progress) ** 4;
+        // Smooth acceleration caps the peak camera step instead of rushing out on frame one.
+        const remaining = 1 - progress * progress * (3 - 2 * progress);
         const zoom = 1 + 4.4 * remaining;
         const x = outputWidth / 2 - width * zoom / 2 + width * .177 * remaining;
         const y = outputHeight / 2 - height * zoom / 2 + height * .169 * remaining;
-        screen.fillStyle = '#fff'; screen.fillRect(0, 0, outputWidth, outputHeight);
-        screen.drawImage(scene, x, y, width * zoom, height * zoom);
-        if (progress < 1) frame = requestAnimationFrame(draw);
-        else { scene.width = 0; scene.height = 0; finish(); }
+        if (raster) raster.draw(x, y, width * zoom, height * zoom);
+        else if (screen) {
+          screen.fillStyle = '#fff'; screen.fillRect(0, 0, outputWidth, outputHeight);
+          screen.drawImage(scene, x, y, width * zoom, height * zoom);
+        }
+        if (progress === 1 && !reported) {
+          reported = true;
+          frameTimes.sort((a,b) => a-b);
+          complete.current({ renderer: raster ? 'webgl' : 'canvas2d', frames: frameTimes.length, medianMs: frameTimes[Math.floor(frameTimes.length * .5)] ?? 0, p95Ms: frameTimes[Math.floor(frameTimes.length * .95)] ?? 0, over25Ms: frameTimes.filter(ms => ms > 25).length });
+        }
+        // Continue presenting the last GPU frame through the opacity handoff.
+        frame = requestAnimationFrame(draw);
       };
       frame = requestAnimationFrame(draw);
     }).catch(finish);
     // A resize invalidates the neutral camera snapshot; hand back to the responsive live scene.
     if (!subject) window.addEventListener('resize', finish, { once: true });
-    return () => { cancelled = true; cancelAnimationFrame(frame); window.removeEventListener('resize', finish); output.width = 0; output.height = 0; };
+    output.addEventListener('webglcontextlost', finish, { once: true });
+    return () => { cancelled = true; cancelAnimationFrame(frame); window.removeEventListener('resize', finish); output.removeEventListener('webglcontextlost', finish); raster?.dispose(); output.width = 0; output.height = 0; };
   }, [subject, light]);
   return <canvas ref={canvas} className={subject ? 'studio-lens-canvas' : 'studio-entrance-canvas'} aria-hidden="true" onTransitionEnd={event => { if (!subject && event.propertyName === 'opacity') onFadeComplete?.(); }} />;
 }

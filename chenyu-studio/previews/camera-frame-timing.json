@@ -1,0 +1,25 @@
+{
+  "note": "Foreground requestAnimationFrame callback intervals, not presented-frame or GPU timings. No screenshots during compared runs. The final version also replaces quartic easing with smooth acceleration/deceleration.",
+  "baseline": {
+    "viewport": [
+      1440,
+      1000
+    ],
+    "renderer": "canvas2d",
+    "frames": 330,
+    "medianMs": 8.300000000000182,
+    "p95Ms": 9.299999999999955,
+    "over25Ms": 1
+  },
+  "gpu": {
+    "viewport": [
+      1440,
+      1000
+    ],
+    "renderer": "webgl",
+    "frames": 325,
+    "medianMs": 8.300000000000182,
+    "p95Ms": 9.799999999999955,
+    "over25Ms": 1
+  }
+}

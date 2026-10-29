@@ -3,7 +3,7 @@ import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring } 
 import { clamp, studioPlane, studioView } from '../lib/space/perspective';
 import { artworkAim, wallPlane, type WallArtwork } from '../data/gallery';
 import WallGallery from './WallGallery';
-import StudioEntrance from './StudioEntrance';
+import StudioEntrance, { type CameraFrameStats } from './StudioEntrance';
 
 type Target = 'about' | 'work' | 'notes' | 'contact' | 'camera' | 'lamp';
 type LensSubject = { kind: 'portrait' } | { kind: 'artwork'; artwork: WallArtwork };
@@ -43,6 +43,7 @@ export default function Studio() {
   const [stageWidth, setStageWidth] = useState(1000);
   const [introComplete, setIntroComplete] = useState(false);
   const [introRevealing, setIntroRevealing] = useState(false);
+  const [introStats, setIntroStats] = useState<CameraFrameStats | null>(null);
   const [loaded, setLoaded] = useState<string[]>([]);
   const [failed, setFailed] = useState(false);
   const [blinkReady, setBlinkReady] = useState(false);
@@ -221,7 +222,7 @@ export default function Studio() {
     aria-label={label} tabIndex={cameraMode ? -1 : 0}
   ><span className="hotspot-marker" aria-hidden="true"/><span className="hotspot-label">{hints[target]}</span></a>;
 
-  return <div className={`studio ${cameraMode ? 'is-camera' : ''} ${selectedArtwork ? 'is-artwork-view' : ''} ${light ? 'light-on' : 'light-off'} ${showHints ? 'show-hints' : ''} ${moving ? 'is-moving' : ''} ${dragging ? 'is-dragging' : ''} ${introRevealing ? 'is-revealing' : ''}`} ref={root}>
+  return <div className={`studio ${cameraMode ? 'is-camera' : ''} ${selectedArtwork ? 'is-artwork-view' : ''} ${light ? 'light-on' : 'light-off'} ${showHints ? 'show-hints' : ''} ${moving ? 'is-moving' : ''} ${dragging ? 'is-dragging' : ''} ${introRevealing ? 'is-revealing' : ''}`} ref={root} data-intro-performance={introStats ? JSON.stringify(introStats) : undefined}>
     <div className="studio-window" ref={stage} tabIndex={0} role="region" aria-label="工作室 2.5D 视图" aria-describedby="studio-view-instructions"
       onPointerDownCapture={() => { if (!introComplete) skipEntrance(); }}
       onPointerDown={startDrag} onPointerMove={point} onPointerUp={stopDrag} onPointerCancel={stopDrag} onLostPointerCapture={stopDrag}
@@ -288,7 +289,7 @@ export default function Studio() {
       <div className="studio-ambient-shade" aria-hidden="true" />
       <div className="studio-key-light" aria-hidden="true" />
       </div>
-      {!introComplete && !reduceMotion && <StudioEntrance onComplete={() => setIntroRevealing(true)} onFadeComplete={skipEntrance} />}
+      {!introComplete && !reduceMotion && <StudioEntrance onComplete={stats => { if (stats) setIntroStats(stats); setIntroRevealing(true); }} onFadeComplete={skipEntrance} />}
       {!introComplete && ready && <button type="button" className="entrance-skip" onClick={skipEntrance} aria-label="跳过开场运镜"><Glyph name="close" size={18}/></button>}
       {selectedArtwork && <StudioEntrance subject={selectedArtwork} light={light} onComplete={exitCamera} />}
       <AnimatePresence>
