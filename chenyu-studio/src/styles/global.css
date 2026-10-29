@@ -41,7 +41,7 @@
 .light-on .studio-floor-shadows{opacity:1}
 .is-artwork-view .studio-floor-shadows{opacity:0}
 .light-on .lamp-shade{fill:#fff4df;fill-opacity:.68;opacity:1}
-.light-off .lamp-shade{fill:#536070;fill-opacity:.38;opacity:1}
+.light-off .lamp-shade{opacity:0}
 .light-on .light-rays,.light-off .light-rays{display:none}
 .studio-poster.gallery-studio-poster{left:12%;top:30%;width:70%;height:70%}
 /* Remove only the empty paper above the desk's rigid device outlines. The source art stays intact. */
