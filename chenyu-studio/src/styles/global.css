@@ -35,7 +35,7 @@
 .studio-ambient-shade,.studio-key-light{position:absolute;inset:0;z-index:5;pointer-events:none;mask-image:linear-gradient(90deg,#0000,#000 12%,#000 88%,#0000),linear-gradient(#0000,#000 12%,#000 87%,#0000);mask-composite:intersect;mix-blend-mode:multiply;transition:opacity .45s var(--ease)}
 .studio-ambient-shade{background:radial-gradient(ellipse at 14% 35%,#74808e3d,transparent 66%),linear-gradient(180deg,#85817a1c,transparent 64%,#c0b7a21a);opacity:.85}
 .light-off .studio-ambient-shade{opacity:1}
-.studio-key-light{background:radial-gradient(ellipse 68% 70% at 76% 52%,#ffcf80a8 0%,#ffdd9d75 36%,#ffe6b538 67%,#ffedcf00 100%),radial-gradient(ellipse 65% 20% at 64% 88%,#ffdc9c75,#ffe4b540 50%,#fff0 100%);opacity:0}
+.studio-key-light{background:radial-gradient(ellipse 68% 70% at 76% 44%,#ffcf80a8 0%,#ffdd9d75 36%,#ffe6b538 67%,#ffedcf00 100%),radial-gradient(ellipse 65% 20% at 64% 88%,#ffdc9c75,#ffe4b540 50%,#fff0 100%);opacity:0}
 .light-on .studio-key-light{opacity:1}
 .studio-floor-shadows{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 19% 2.5% at 32% 95%,#39352d36,transparent 100%),radial-gradient(ellipse 14% 2% at 68% 97%,#39352d2e,transparent 100%),radial-gradient(ellipse 13% 1.7% at 86% 91%,#39352d26,transparent 100%);opacity:.25;transition:opacity .45s var(--ease)}
 .light-on .studio-floor-shadows{opacity:1}
