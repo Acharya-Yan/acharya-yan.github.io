@@ -1,0 +1,25 @@
+{
+  "note": "Foreground animation callback intervals; not presented-frame or GPU timings. No screenshot during the measured run.",
+  "configuration": {
+    "durationMs": 1600,
+    "fadeMs": 160,
+    "startZoom": 3.2,
+    "sourceTexture": [
+      2048,
+      2048
+    ],
+    "outputMaxWidth": 1920,
+    "prepareLiveAtProgress": 0.8
+  },
+  "run": {
+    "viewport": [
+      1440,
+      1000
+    ],
+    "renderer": "webgl",
+    "frames": 181,
+    "medianMs": 8.299999999999955,
+    "p95Ms": 10.199999999999932,
+    "over25Ms": 1
+  }
+}

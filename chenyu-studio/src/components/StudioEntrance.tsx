@@ -4,8 +4,10 @@ import { createRasterCamera } from '../lib/space/raster-camera';
 
 /** A bounded raster buffer avoids scaling an entire masked 3D tree into giant GPU tiles. */
 export type CameraFrameStats = { renderer: string; frames: number; medianMs: number; p95Ms: number; over25Ms: number };
-export default function StudioEntrance({ onComplete, onFadeComplete, subject, light = true }: { onComplete: (stats?: CameraFrameStats) => void; onFadeComplete?: () => void; subject?: WallArtwork; light?: boolean }) {
+export default function StudioEntrance({ onComplete, onFadeComplete, onPrepare, subject, light = true }: { onComplete: (stats?: CameraFrameStats) => void; onFadeComplete?: () => void; onPrepare?: () => void; subject?: WallArtwork; light?: boolean }) {
   const canvas = useRef<HTMLCanvasElement>(null);
+  const prepare = useRef(onPrepare);
+  prepare.current = onPrepare;
   const complete = useRef(onComplete);
   complete.current = onComplete;
   useEffect(() => {
@@ -23,15 +25,20 @@ export default function StudioEntrance({ onComplete, onFadeComplete, subject, li
       if (cancelled) return;
       const box = output.getBoundingClientRect();
       // Cap both DPR and total dimensions; the output never grows with the camera zoom.
-      const outputWidth = Math.round(Math.min(1920, box.width * Math.min(devicePixelRatio, 1.5)));
+      const outputWidth = Math.round(Math.min(subject ? 2560 : 1920, box.width * Math.min(devicePixelRatio, subject ? 2 : 1.5)));
       const outputHeight = Math.round(outputWidth * box.height / box.width);
       const width = Math.round(Math.min(outputWidth, outputHeight * 4 / 3));
       const height = Math.round(width * .75);
       if (!width || !height) { finish(); return; }
       output.width = outputWidth; output.height = outputHeight;
-      const scene = document.createElement('canvas'); scene.width = width; scene.height = height;
+      const scene = document.createElement('canvas');
+      // Preserve native illustration detail in one POT texture; output resolution stays bounded.
+      const sourceScale = subject ? 1 : 2048 / width;
+      scene.width = subject ? width : 2048; scene.height = subject ? height : 2048;
       const ctx = scene.getContext('2d');
       if (!ctx) { finish(); return; }
+      ctx.scale(sourceScale, sourceScale);
+      ctx.imageSmoothingQuality = 'high';
       ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, width, height);
       wallArtworks.forEach((art, index) => {
         const w = width * art.size / 100, h = w * art.height / art.width;
@@ -87,27 +94,28 @@ export default function StudioEntrance({ onComplete, onFadeComplete, subject, li
         scene.width = 0; scene.height = 0;
         return;
       }
-      raster = createRasterCamera(output, scene);
+      raster = createRasterCamera(output, scene, [width * sourceScale / scene.width, height * sourceScale / scene.height]);
       const screen = raster ? null : output.getContext('2d', { alpha: false });
       if (!raster && !screen) { finish(); return; }
       if (raster) { scene.width = 0; scene.height = 0; }
-      let start = 0, previousFrame = 0, reported = false;
+      let start = 0, previousFrame = 0, reported = false, prepared = false;
       const frameTimes: number[] = [];
       const draw = (now: number) => {
         if (cancelled) return;
         if (previousFrame) frameTimes.push(now - previousFrame);
         previousFrame = now;
         if (!start) start = now;
-        const progress = Math.min(1, (now - start) / 2800);
+        const progress = Math.min(1, (now - start) / 1600);
         // Smooth acceleration caps the peak camera step instead of rushing out on frame one.
         const remaining = 1 - progress * progress * (3 - 2 * progress);
-        const zoom = 1 + 4.4 * remaining;
-        const x = outputWidth / 2 - width * zoom / 2 + width * .177 * remaining;
-        const y = outputHeight / 2 - height * zoom / 2 + height * .169 * remaining;
+        const zoom = 1 + 2.2 * remaining;
+        const x = outputWidth / 2 - width * zoom / 2 + width * .105 * remaining;
+        const y = outputHeight / 2 - height * zoom / 2 + height * .1 * remaining;
+        if (progress >= .8 && !prepared) { prepared = true; prepare.current?.(); }
         if (raster) raster.draw(x, y, width * zoom, height * zoom);
         else if (screen) {
           screen.fillStyle = '#fff'; screen.fillRect(0, 0, outputWidth, outputHeight);
-          screen.drawImage(scene, x, y, width * zoom, height * zoom);
+          screen.drawImage(scene, 0, 0, width * sourceScale, height * sourceScale, x, y, width * zoom, height * zoom);
         }
         if (progress === 1 && !reported) {
           reported = true;

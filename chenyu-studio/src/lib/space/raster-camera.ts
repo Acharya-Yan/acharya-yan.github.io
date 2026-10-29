@@ -1,5 +1,5 @@
 /** Upload the room once. Camera frames update two uniforms, without Canvas2D resampling. */
-export function createRasterCamera(output: HTMLCanvasElement, source: HTMLCanvasElement) {
+export function createRasterCamera(output: HTMLCanvasElement, source: HTMLCanvasElement, contentScale: [number, number] = [1, 1]) {
   const gl = output.getContext('webgl', { alpha: false, antialias: false, depth: false, stencil: false, preserveDrawingBuffer: false });
   if (!gl) return null;
   const shaders: WebGLShader[] = [];
@@ -27,11 +27,12 @@ export function createRasterCamera(output: HTMLCanvasElement, source: HTMLCanvas
       uniform vec2 viewportSize;
       uniform vec2 origin;
       uniform vec2 drawSize;
+      uniform vec2 contentScale;
       void main(){
         vec2 pixel=vec2(uv.x,1.-uv.y)*viewportSize;
         vec2 sourceUV=(pixel-origin)/drawSize;
         if(sourceUV.x<0.||sourceUV.x>1.||sourceUV.y<0.||sourceUV.y>1.){gl_FragColor=vec4(1.);return;}
-        vec4 color=texture2D(room,sourceUV);
+        vec4 color=texture2D(room,sourceUV*contentScale);
         gl_FragColor=vec4(mix(vec3(1.),color.rgb,color.a),1.);
       }`);
     program = gl.createProgram();
@@ -47,11 +48,15 @@ export function createRasterCamera(output: HTMLCanvasElement, source: HTMLCanvas
     gl.enableVertexAttribArray(position); gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    const isPowerOfTwo = (size: number) => size > 0 && (size & (size - 1)) === 0;
+    const mipmapped = isPowerOfTwo(source.width) && isPowerOfTwo(source.height);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, mipmapped ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+    if (mipmapped) gl.generateMipmap(gl.TEXTURE_2D);
+    gl.uniform2f(gl.getUniformLocation(program, 'contentScale'), contentScale[0], contentScale[1]);
     gl.uniform1i(gl.getUniformLocation(program, 'room'), 0);
     gl.uniform2f(gl.getUniformLocation(program, 'viewportSize'), output.width, output.height);
     gl.viewport(0, 0, output.width, output.height);
