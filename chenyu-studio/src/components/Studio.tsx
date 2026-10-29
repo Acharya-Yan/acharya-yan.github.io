@@ -265,7 +265,9 @@ export default function Studio() {
         </motion.div>
         </div>
       </motion.div>
+      <div className="studio-floor-shadows" aria-hidden="true" />
       <div className="studio-ambient-shade" aria-hidden="true" />
+      <div className="studio-key-light" aria-hidden="true" />
       <AnimatePresence>
         {cameraMode && <motion.div id="camera-viewfinder" className={`viewfinder ${selectedArtwork ? 'viewfinder-artwork' : 'viewfinder-portrait'}`} role="region" aria-label={selectedArtwork ? `海报取景：《${selectedArtwork.title}》` : '人物取景：严晨宇'} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={transition}>
           <div className="viewfinder-top"><span><span className="camera-dot"/>取景中</span><span>{selectedArtwork ? '海报取景' : '人物取景'}</span></div>

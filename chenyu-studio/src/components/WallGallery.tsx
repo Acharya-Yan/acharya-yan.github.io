@@ -91,7 +91,6 @@ export default function WallGallery({ selected, onSelect, disabled, planeStyle, 
 
   return <>
     <div className="gallery-wall" style={planeStyle} aria-label="我的电影、游戏与音乐收藏" role="group" inert={disabled}>
-      <div className="gallery-light" aria-hidden="true" />
       {wallArtworks.map(artwork => {
         const music = artwork.kind === 'music';
         const isActive = active?.id === artwork.id;
