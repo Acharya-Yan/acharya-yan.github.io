@@ -16,8 +16,7 @@ export const site = {
 
 export const equipment = [
   { name: '主显示器与屏幕挂灯', description: '桌面中央，留给正在进行的事情。' },
-  { name: '支架上的笔记本', description: '放在左手边，和主屏幕一起使用。' },
+  { name: '支架上的笔记本', description: '与主屏幕一起使用，主要放 AI Agent 协作项目。' },
   { name: '键盘、平板与触控板', description: '白色桌面上的日常工具。' },
-  { name: '双音箱与游戏主机', description: '按原来的位置，放在桌面两侧。' },
-  { name: '相机与摄影灯', description: '转过身，镜头就在眼前。' },
+  { name: '索尼 A7M4', description: '自媒体的开始。' },
 ];

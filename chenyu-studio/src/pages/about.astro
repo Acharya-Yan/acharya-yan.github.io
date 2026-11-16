@@ -20,7 +20,7 @@ import { equipment } from '../data/site';
     <img class="about-avatar" src="/assets/about-portrait.webp" alt="严晨宇的漫画形象，戴透明框眼镜，穿白色卫衣，坐在办公椅上" width="592" height="968" fetchpriority="high" />
   </section>
   <section id="my-desk" class="desk-story shell">
-    <div class="section-heading"><h2>我的桌面，我的日常。</h2><span class="serif section-aside">Behind the screen</span></div>
+    <div class="section-heading"><h2>我的桌面，我的日常。</h2></div>
     <div class="desk-story-layout"><img src="/assets/desk.webp" alt="左侧笔记本、中央主显示器与挂灯、白色键盘、平板、手机、音箱和右侧游戏主机组成的桌搭" width="1448" height="1086" loading="lazy"/><div class="equipment-list">{equipment.map((item,index) => <details open={index === 0}><summary>{item.name}<Icon name="plus" size={18}/></summary><p>{item.description}</p></details>)}</div></div>
   </section>
   <section class="about-later shell"><span class="serif">Still becoming.</span><div><h2>介绍还在慢慢补全。</h2><p>经历、兴趣、最近在做的事情，<br/>都会陆续放进来。</p><a class="text-link" href="/work/">先看看正在做的事 <Icon size={17}/></a></div></section>
