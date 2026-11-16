@@ -8,6 +8,10 @@ const work = defineCollection({
     title: z.string(), summary: z.string(), date: z.coerce.date(),
     category: z.string(), role: z.string().optional(),
     cover: z.string().optional(), coverAlt: z.string().optional(),
+    coverSize: z.object({
+      width: z.number().int().positive(),
+      height: z.number().int().positive(),
+    }).optional(),
     url: z.url().optional(), draft: z.boolean().default(true),
     featured: z.boolean().default(false),
   }),
