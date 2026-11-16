@@ -11,7 +11,7 @@ const works = (await getCollection('work', ({ data }) => site.showDrafts || !dat
     <div class="collection-bar"><span>所有作品</span><span>{String(works.length).padStart(2,'0')} 个项目</span></div>
     <div class="work-collection">{works.map(work => <a href={`/work/${work.id}/`} class="work-entry">
       <div class="work-entry-image"><img src={work.data.cover ?? '/assets/desk.webp'} alt={work.data.coverAlt ?? work.data.title} width="1448" height="1086" loading="lazy"/><span class="art-open"><Icon size={24}/></span></div>
-      <div class="work-entry-text"><div><h2>{work.data.title}</h2><p>{work.data.summary}</p></div><span>{work.data.category}<small>{work.data.draft ? '进行中' : work.data.date.getUTCFullYear()}</small></span></div>
+      <div class="work-entry-text"><div><h2>{work.data.title}</h2><p>{work.data.summary}</p></div><span>{work.data.category}<small>{work.data.draft ? '内容持续补充' : work.data.date.getUTCFullYear()}</small></span></div>
     </a>)}</div>
     <div class="collection-end"><span class="serif">More to come.</span><p>{works.length ? '下一个想法，正在路上。' : '作品正在整理，之后会放在这里。'}</p><a class="text-link" href="/">回工作室坐坐 <Icon size={16}/></a></div>
   </div>

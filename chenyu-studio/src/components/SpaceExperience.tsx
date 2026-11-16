@@ -69,7 +69,7 @@ export default function SpaceExperience(){
       </>:selected==='work'?<>
         <h2 id="space-detail-title" tabIndex={-1} ref={heading}>正在做的<br/>事情<span>。</span></h2>
         <p className="space-detail-english">Work, in progress.</p>
-        <a className="space-project" href="/work/online-studio/"><img src="/assets/studio-poster.webp" alt="线上工作室的漫画版本"/><div><h3>我的线上工作室</h3><Glyph name="arrow"/></div><p>从桌搭、漫画形象，到可以环绕的空间。</p><span>个人网站 · 进行中</span></a>
+        <a className="space-project" href="/work/online-studio/"><img src="/assets/studio-poster.webp" alt="个人网站的漫画工作室场景"/><div><h3>我的个人网站</h3><Glyph name="arrow"/></div><p>记录我的独立开发和自媒体创作。</p><span>内容持续补充</span></a>
         <h3>屏幕里的下一件事</h3><p>更多作品会放在这里。每一件作品，都有自己的过程与故事。</p>
         <a href="/work/" className="space-detail-link">查看作品目录 <Glyph name="arrow"/></a>
       </>:<>
